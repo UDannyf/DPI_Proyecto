@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 
 def segmentacionColor(img):
     image = img
-    num_clusters = 15
+    num_clusters = 10
     # Creamos una copia para poderla manipular a nuestro antojo.
     image_copy = np.copy(image)
  
@@ -162,10 +162,12 @@ def yoloImage(imagen):
 
 #path = "images/img1.jpg"
 #path = "images/img2.jpg"
-path = "images/img3.jpg"
+#path = "images/img3.jpg"
+path = "images/img4.jpg"
+#path = "images/img5.jpg"
 while(True):
     print ("\n\n\t0. Salir\n\t1. Cargar una imagen\n\t2. Realzado filtro Unsharping"+
-           "\n\t3. Realzado filtroHomomorfico \n\t4. Segmentacion Warershed  \n\t5. Segmentacion Color\n")
+           "\n\t3. Realzado filtro Sharpen \n\t4. Segmentacion Warershed  \n\t5. Segmentacion Color\n")
     op = input("\n\tIngrese la opcion --> ")
 
     if (op=='0'):
