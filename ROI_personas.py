@@ -1,6 +1,91 @@
 from cv2 import cv2
 from glob import glob
 import numpy as np
+from matplotlib import pyplot as plt
+
+def segmentacionColor(img):
+    image = img
+    num_clusters = 15
+    # Creamos una copia para poderla manipular a nuestro antojo.
+    image_copy = np.copy(image)
+ 
+    # Mostramos la imagen y esperamos que el usuario presione cualquier tecla para continuar.
+    #cv2.imshow('Imagen', image)
+    #cv2.waitKey(0)
+ 
+    # Convertiremos la imagen en un arreglo de ternas, las cuales representan el valor de cada pixel. En pocas palabras,
+    # estamos aplanando la imagen, volviéndola un vector de puntos en un espacio 3D.
+    pixel_values = image_copy.reshape((-1, 3))
+    pixel_values = np.float32(pixel_values)
+    
+    # Abajo estamos aplicando K-Means. Como siempre, OpenCV es un poco complicado en su sintaxis, así que vamos por partes.
+    
+    # Definimos el criterio de terminación del algoritmo. En este caso, terminaremos cuando la última actualización de los
+    # centroides sea menor a *epsilon* (cv2.TERM_CRITERIA_EPS), donde epsilon es 1.0 (último elemento de la tupla), o bien
+    # cuando se hayan completado 10 iteraciones (segundo elemento de la tupla, criterio cv2.TERM_CRITERIA_MAX_ITER).
+    stop_criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+    
+    # Este es el número de veces que se correrá K-Means con diferentes inicializaciones. La función retornará los mejores
+    # resultados.
+    number_of_attempts = 10
+    
+    # Esta es la estrategia para inicializar los centroides. En este caso, optamos por inicialización aleatoria.
+    centroid_initialization_strategy = cv2.KMEANS_RANDOM_CENTERS
+    
+    # Ejecutamos K-Means con los siguientes parámetros:
+    # - El arreglo de pixeles.
+    # - K o el número de clusters a hallar.
+    # - None indicando que no pasaremos un arreglo opcional de las mejores etiquetas.
+    # - Condición de parada.
+    # - Número de ejecuciones.
+    # - Estrategia de inicialización.
+    #
+    # El algoritmo retorna las siguientes salidas:
+    # - Un arreglo con la distancia de cada punto a su centroide. Aquí lo ignoramos.
+    # - Arreglo de etiquetas.
+    # - Arreglo de centroides.
+    _, labels, centers = cv2.kmeans(pixel_values,num_clusters,
+                                    None,
+                                stop_criteria,
+                                number_of_attempts,
+                                centroid_initialization_strategy)
+ 
+    # Aplicamos las etiquetas a los centroides para segmentar los pixeles en su grupo correspondiente.
+    centers = np.uint8(centers)
+    segmented_data = centers[labels.flatten()]
+    
+    # Debemos reestructurar el arreglo de datos segmentados con las dimensiones de la imagen original.
+    segmented_image = segmented_data.reshape(image_copy.shape)
+    
+    # Mostramos la imagen segmentada resultante.
+    #cv2.imshow('Imagen segmentada', segmented_image)
+    #cv2.waitKey(0)
+    return segmented_image
+
+def segmentacionWarershed(img):
+    img = img
+    gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    ret, thresh = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+    # Eliminación del ruido
+    kernel = np.ones((3,3),np.uint8)
+    opening = cv2.morphologyEx(thresh,cv2.MORPH_OPEN,kernel, iterations = 2)
+    # Encuentra el área del fondo
+    sure_bg = cv2.dilate(opening,kernel,iterations=3)
+    # Encuentra el área del primer
+    dist_transform = cv2.distanceTransform(opening,cv2.DIST_L2,5)
+    ret, sure_fg = cv2.threshold(dist_transform,0.7*dist_transform.max(),255,0)
+    # Encuentra la región desconocida (bordes)
+    sure_fg = np.uint8(sure_fg)
+    unknown = cv2.subtract(sure_bg,sure_fg)
+    # Etiquetado
+    ret, markers = cv2.connectedComponents(sure_fg)
+    # Adiciona 1 a todas las etiquetas para asegurra que el fondo sea 1 en lugar de cero
+    markers = markers+1
+    # Ahora se marca la región desconocida con ceros
+    markers[unknown==255] = 0
+    markers = cv2.watershed(img,markers)
+    img[markers == -1] = [255,0,0]
+    return img
 
 def filtroUnsharping(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -48,7 +133,7 @@ def yoloImage(imagen):
     img = imagen
     #frame_count =0
     #img = cv2.imread("room_ser.jpg")
-    img = cv2.resize(img, None, fx=2, fy=2)
+    img = cv2.resize(img, None, fx=1, fy=1)
     height, width, channels = img.shape    
     # Detecting objects
     blob = cv2.dnn.blobFromImage(img, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
@@ -93,12 +178,12 @@ def yoloImage(imagen):
 
 ################### munu############
 
-path = "images/img1.jpg"
+#path = "images/img1.jpg"
 #path = "images/img2.jpg"
-#path = "images/img3.jpg"
+path = "images/img3.jpg"
 while(True):
     print ("\n\n\t0. Salir\n\t1. Cargar una imagen\n\t2. Realzado filtro Unsharping"+
-           "\n\t3. Realzado filtroHomomorfico \n")
+           "\n\t3. Realzado filtroHomomorfico \n\t4. Segmentacion Warershed  \n\t5. Segmentacion Color\n")
     op = input("\n\tIngrese la opcion --> ")
 
     if (op=='0'):
@@ -128,7 +213,24 @@ while(True):
         cv2.imshow("Imagen", r1)
         cv2.imshow("Imagen Yolo", clon)
         cv2.waitKey(0)
-   
+    
+    elif (op=='4'):
+        print ("\n\tSegmentacion Warershed\n")
+        img = cv2.imread(path,1)
+        s1 = segmentacionWarershed(img)
+        clon = yoloImage(s1)
+        cv2.imshow("Imagen Segmentada", s1)
+        cv2.imshow("Imagen Yolo", clon)
+        cv2.waitKey(0)
+    
+    elif (op=='5'):
+        print ("\n\tSegmentación Color\n")
+        img = cv2.imread(path,1)
+        s2 = segmentacionColor(img)
+        clon = yoloImage(s2)
+        cv2.imshow("Imagen Segmentada", s2)
+        cv2.imshow("Imagen Yolo", clon)
+        cv2.waitKey(0)
     else:
         print ("\n\tLa opción no es válida.")     
     cv2.destroyAllWindows()
