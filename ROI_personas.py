@@ -101,6 +101,20 @@ def filtroSharpen(img):
     result = cv2.filter2D(img, -1, sharpen)
     return result
 
+def detectFace(image): 
+    faceClassif = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    faces = faceClassif.detectMultiScale(gray,
+    scaleFactor=1.1,
+    minNeighbors=5)
+    countFace = 0
+    for (x,y,w,h) in faces:
+        cv2.rectangle(image,(x,y),(x+w,y+h),(0,255,0),2)
+        countFace = countFace +1
+    print("conteo de rostros: ",countFace)
+    return image
+    
 def yoloImage(imagen):
     net = cv2.dnn.readNetFromDarknet("yolov3.cfg","yolov3.weights")
     classes = []
@@ -158,16 +172,17 @@ def yoloImage(imagen):
     print('conteo de Personas: ',count)
     return img
 
-################### munu############
+################### menu############
 
-#path = "images/img1.jpg"
+path = "images/img1.jpg"
 #path = "images/img2.jpg"
 #path = "images/img3.jpg"
-path = "images/img4.jpg"
+#path = "images/img4.jpg"
 #path = "images/img5.jpg"
 while(True):
     print ("\n\n\t0. Salir\n\t1. Cargar una imagen\n\t2. Realzado filtro Unsharping"+
-           "\n\t3. Realzado filtro Sharpen \n\t4. Segmentacion Warershed  \n\t5. Segmentacion Color\n")
+           "\n\t3. Realzado filtro Sharpen \n\t4. Segmentacion Warershed  \n\t5. Segmentacion Color"+
+           "\n\t6. Detección rostros\n")
     op = input("\n\tIngrese la opcion --> ")
 
     if (op=='0'):
@@ -215,6 +230,16 @@ while(True):
         cv2.imshow("Imagen Segmentada", s2)
         cv2.imshow("Imagen Yolo", clon)
         cv2.waitKey(0)
+    
+    elif (op=='6'):
+        print ("\n\tDetectar Rostro\n")
+        img = cv2.imread(path,1)
+        imge = img.copy()
+        dt = detectFace(imge)
+        cv2.imshow("Imagen original", img)
+        cv2.imshow("Conteo rostro", dt)
+        cv2.waitKey(0)
+        
     else:
         print ("\n\tLa opción no es válida.")     
     cv2.destroyAllWindows()
