@@ -92,17 +92,10 @@ def detectFace(image):
     for (x,y,w,h) in faces:
         cv2.rectangle(image,(x,y),(x+w,y+h),(0,255,0),2)
         countFace = countFace +1
-<<<<<<< HEAD
     #print("conteo de rostros: ",countFace)
     return image, countFace
     
 def yolo(imagen):
-=======
-    print("conteo de rostros: ",countFace)
-    return image
-    
-def yoloImage(imagen):
->>>>>>> e58be58d019452416e08f2c40c0d60a1eb2895e6
     net = cv2.dnn.readNetFromDarknet("yolov3.cfg","yolov3.weights")
     classes = []
     with open("coco.names", "r") as f:
@@ -159,7 +152,6 @@ def yoloImage(imagen):
     #print('conteo de Personas: ',count)
     return img, count
 
-<<<<<<< HEAD
 ################### Combinacion segmentacion-realzado #################
 
 def s1r1(image):    
@@ -168,20 +160,6 @@ def s1r1(image):
     img, count = yolo(img2)
     img, face = detectFace(img)    
     return img, count, face
-=======
-################### menu############
-
-path = "images/img1.jpg"
-#path = "images/img2.jpg"
-#path = "images/img3.jpg"
-#path = "images/img4.jpg"
-#path = "images/img5.jpg"
-while(True):
-    print ("\n\n\t0. Salir\n\t1. Cargar una imagen\n\t2. Realzado filtro Unsharping"+
-           "\n\t3. Realzado filtro Sharpen \n\t4. Segmentacion Warershed  \n\t5. Segmentacion Color"+
-           "\n\t6. Detección rostros\n")
-    op = input("\n\tIngrese la opcion --> ")
->>>>>>> e58be58d019452416e08f2c40c0d60a1eb2895e6
 
 def s1r2(image):
     img1 = s1(image)
@@ -221,7 +199,6 @@ def mayor(num1, num2, num3, num4):
         i4 = 1
     return i1, i2, i3, i4
     
-<<<<<<< HEAD
             
 
 
@@ -236,7 +213,7 @@ for path in glob('img_prueba/*.jpg'):
     cv2.imshow("Imagen", img)
     cv2.waitKey(0)
     pr0 = input("\n\tIngrese # personas --> ")
-    fc0 = input("\n\tIngrese # rotros --> ")
+    fc0 = input("\n\tIngrese # rostros --> ")
     p0 = int(pr0)
     f0 = int(fc0)
     if (p0 == -1):
@@ -267,38 +244,16 @@ for path in glob('img_prueba/*.jpg'):
     #cv2.imshow('Segmentación1_realzado2', img1)
     #cv2.imshow('Segmentación2_realzado1', img1)
     #cv2.imshow('Segmentación2_realzado2', img1)
-    #concat_horizontal = cv2.hconcat([img1, img2])
-    #concat_horizontal1 = cv2.hconcat([img3, img4])
-    #cv2.imshow('concat_horizontal', concat_horizontal)
-    #cv2.imshow('concat_horizontal', concat_horizontal1)
+    concat_horizontal = cv2.hconcat([img1, img2])
+    concat_horizontal1 = cv2.hconcat([img3, img4])
+    cv2.imshow('concat_horizontal', concat_horizontal)
+    cv2.imshow('concat_horizontal', concat_horizontal1)
     print("Datos      |  GT  | Segmenta1_realza1 | Segmenta1_realza2 | Segmenta2_realza1 | Segmenta2_realza2")
     print("Personas   |  %d  |      %d           |         %d        |        %d         |         %d       " % (p0, p1, p2, p3, p4))
     print("Err_Per    | 0.0  |      %.2f         |         %.2f      |        %.2f       |         %.2f       " % (ep1, ep2, ep3, ep4))
     print("Rostros    |  %d  |      %d           |         %d        |        %d         |         %d       " % (f0, f1, f2, f3, f4))
     print("Err_rost   | 0.0  |      %.2f         |         %.2f      |        %.2f       |         %.2f       " % (er1, er2, er3, er4))    
     cv2.waitKey(0)
-=======
-    elif (op=='5'):
-        print ("\n\tSegmentación Color\n")
-        img = cv2.imread(path,1)
-        s2 = segmentacionColor(img)
-        clon = yoloImage(s2)
-        cv2.imshow("Imagen Segmentada", s2)
-        cv2.imshow("Imagen Yolo", clon)
-        cv2.waitKey(0)
-    
-    elif (op=='6'):
-        print ("\n\tDetectar Rostro\n")
-        img = cv2.imread(path,1)
-        imge = img.copy()
-        dt = detectFace(imge)
-        cv2.imshow("Imagen original", img)
-        cv2.imshow("Conteo rostro", dt)
-        cv2.waitKey(0)
-        
-    else:
-        print ("\n\tLa opción no es válida.")     
->>>>>>> e58be58d019452416e08f2c40c0d60a1eb2895e6
     cv2.destroyAllWindows()
 
 plt.bar(plistx,plisty,align = "center")
